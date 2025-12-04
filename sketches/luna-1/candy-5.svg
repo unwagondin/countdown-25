@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 250 250">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: red;
+      }
+
+      .cls-1, .cls-2, .cls-3 {
+        stroke: red;
+      }
+
+      .cls-1, .cls-3 {
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .cls-4 {
+        clip-path: url(#clippath-1);
+      }
+
+      .cls-5 {
+        clip-path: url(#clippath-2);
+      }
+
+      .cls-2 {
+        fill: none;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-3 {
+        fill: #fff;
+      }
+
+      .cls-6 {
+        clip-path: url(#clippath);
+      }
+    </style>
+    <clipPath id="clippath">
+      <polygon class="cls-2" points="197 116 197 98 197 80 147.8 80 147.8 116 197 116"/>
+    </clipPath>
+    <clipPath id="clippath-1">
+      <polygon class="cls-2" points="147.8 179 197 179 197 170 197 152 197 134 147.8 134 147.8 179"/>
+    </clipPath>
+    <clipPath id="clippath-2">
+      <path class="cls-2" d="M134,44H53v72h66.4v-11.8h-24.26c-6.04,0-10.94-4.9-10.94-10.94,0-5.59,4.22-10.23,9.77-10.87,1.53-.18,3.04-.4,4.53-.69,4.6-.87,8.73-2.4,12.4-4.6,3.67-2.2,6.77-5.1,9.3-8.7,1.13-1.61,2.09-3.38,2.87-5.33,1.84-4.56,6.08-7.66,10.93-8.03v-11.04Z"/>
+    </clipPath>
+  </defs>
+  <g>
+    <g class="cls-6">
+      <g>
+        <polygon class="cls-1" points="53 188 197 152 197 170 53 206 53 188"/>
+        <polygon class="cls-3" points="53 170 197 134 197 152 53 188 53 170"/>
+        <polygon class="cls-1" points="53 152 197 116 197 134 53 170 53 152"/>
+        <polygon class="cls-3" points="53 134 197 98 197 116 53 152 53 134"/>
+        <polygon class="cls-1" points="53 80 197 44 197 62 53 98 53 80"/>
+        <polygon class="cls-3" points="197 170 197 188 116 206 53 206 197 170"/>
+        <polygon class="cls-1" points="116 206 197 206 197 188 116 206"/>
+        <polygon class="cls-3" points="53 80 53 62 134 44 197 44 53 80"/>
+        <polygon class="cls-1" points="134 44 53 44 53 62 134 44"/>
+        <polygon class="cls-1" points="53 116 197 80 197 98 53 134 53 116"/>
+        <polygon class="cls-3" points="53 98 197 62 197 80 53 116 53 98"/>
+      </g>
+    </g>
+    <polygon class="cls-2" points="197 116 197 98 197 80 147.8 80 147.8 116 197 116"/>
+  </g>
+  <g>
+    <g class="cls-4">
+      <g>
+        <polygon class="cls-1" points="53 188 197 152 197 170 53 206 53 188"/>
+        <polygon class="cls-3" points="53 170 197 134 197 152 53 188 53 170"/>
+        <polygon class="cls-1" points="53 152 197 116 197 134 53 170 53 152"/>
+        <polygon class="cls-3" points="53 134 197 98 197 116 53 152 53 134"/>
+        <polygon class="cls-1" points="53 80 197 44 197 62 53 98 53 80"/>
+        <polygon class="cls-3" points="197 170 197 188 116 206 53 206 197 170"/>
+        <polygon class="cls-1" points="116 206 197 206 197 188 116 206"/>
+        <polygon class="cls-3" points="53 80 53 62 134 44 197 44 53 80"/>
+        <polygon class="cls-1" points="134 44 53 44 53 62 134 44"/>
+        <polygon class="cls-1" points="53 116 197 80 197 98 53 134 53 116"/>
+        <polygon class="cls-3" points="53 98 197 62 197 80 53 116 53 98"/>
+      </g>
+    </g>
+    <polygon class="cls-2" points="147.8 179 197 179 197 170 197 152 197 134 147.8 134 147.8 179"/>
+  </g>
+  <g>
+    <g class="cls-5">
+      <g>
+        <polygon class="cls-1" points="53 188 197 152 197 170 53 206 53 188"/>
+        <polygon class="cls-3" points="53 170 197 134 197 152 53 188 53 170"/>
+        <polygon class="cls-1" points="53 152 197 116 197 134 53 170 53 152"/>
+        <polygon class="cls-3" points="53 134 197 98 197 116 53 152 53 134"/>
+        <polygon class="cls-1" points="53 80 197 44 197 62 53 98 53 80"/>
+        <polygon class="cls-3" points="197 170 197 188 116 206 53 206 197 170"/>
+        <polygon class="cls-1" points="116 206 197 206 197 188 116 206"/>
+        <polygon class="cls-3" points="53 80 53 62 134 44 197 44 53 80"/>
+        <polygon class="cls-1" points="134 44 53 44 53 62 134 44"/>
+        <polygon class="cls-1" points="53 116 197 80 197 98 53 134 53 116"/>
+        <polygon class="cls-3" points="53 98 197 62 197 80 53 116 53 98"/>
+      </g>
+    </g>
+    <path class="cls-2" d="M134,44H53v72h66.4v-11.8h-24.26c-6.04,0-10.94-4.9-10.94-10.94,0-5.59,4.22-10.23,9.77-10.87,1.53-.18,3.04-.4,4.53-.69,4.6-.87,8.73-2.4,12.4-4.6,3.67-2.2,6.77-5.1,9.3-8.7,1.13-1.61,2.09-3.38,2.87-5.33,1.84-4.56,6.08-7.66,10.93-8.03v-11.04Z"/>
+  </g>
+</svg>
