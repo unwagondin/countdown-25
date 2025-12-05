@@ -14,7 +14,7 @@ zeroImg.src = "zero.svg";
 // Load SVG for green squares
 // To change the SVG: replace "square1.svg", "square2.svg", etc. with your own SVG files
 // You can use any number of different SVGs - they'll be randomly assigned to squares
-const squareSVGs = ["pin.svg", "8.svg", "heart.svg", "star.svg"];
+const squareSVGs = ["ball.svg", "heart.svg", "snow.svg", "star.svg"];
 
 const squareImages = [];
 squareSVGs.forEach((src, index) => {
@@ -576,7 +576,7 @@ function update(dt) {
     // Create one green square when gift opens (non-zero gifts only)
     if (gift.isOpen && !gift.hasZero && gift.openProgress === 0) {
       gift.openProgress = 0.01; // Mark as processed
-      const squareSize = gift.size * 0.5;
+      const squareSize = gift.size * 0.8;
       greenSquares.push(new GreenSquare(gift.x, gift.y, 0, 0, squareSize));
     }
   }
