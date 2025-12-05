@@ -6,17 +6,36 @@ const { ctx, canvas } = renderer;
 canvas.style.cursor = "none";
 
 let endFade = 0;
-run(update);
 
-// Load the SVG images
-const mouseImage = new Image();
-mouseImage.src = "mouse.svg"; // default cursor
+async function loadImage(url) {
+  return new Promise((res) => {
+    const img = new Image();
+    img.src = url;
+    img.onload = () => {
+      res(img);
+    };
+  });
+}
 
-const mousePressedImage = new Image();
-mousePressedImage.src = "candle-light.svg"; // cursor when clicked
+let mouseImage;
+let mousePressedImage;
+let svgImage;
+let clickSound; // New: Audio object for the click sound
+let isSoundPlaying = false; // New: Track if the sound is currently playing
 
-const svgImage = new Image();
-svgImage.src = "2.svg";
+async function preload() {
+  mouseImage = await loadImage("mouse.svg");
+  mousePressedImage = await loadImage("candle-light.svg");
+  svgImage = await loadImage("2.svg");
+
+  // New: Load the audio file (replace 'click-sound.mp3' with your file)
+  clickSound = new Audio("candle.mp3");
+  clickSound.loop = true; // Loop the sound while active
+
+  run(update);
+}
+
+preload();
 
 // Utility to extract visible bounds
 function getSVGVisibleBounds(img, callback) {
@@ -56,11 +75,6 @@ function getSVGVisibleBounds(img, callback) {
   };
 }
 
-let mouseBounds = null;
-mouseImage.onload = () => {
-  getSVGVisibleBounds(mouseImage, (b) => (mouseBounds = b));
-};
-
 // Animation variables
 let topRadius = 20;
 const bottomRadius = 20;
@@ -92,16 +106,18 @@ function drawRoundedRect(x, y, width, height, radii) {
 }
 
 function update(dt) {
-  const svgWidth = svgImage.width * 5; // Increased from 3 to 5
-  const svgHeight = svgImage.height * 5; // Increased from 3 to 5
+  const cubeSize = Math.min(canvas.width / 2, canvas.height / 2);
+
+  const svgAspect = svgImage.width / svgImage.height;
+  const svgWidth = cubeSize * svgAspect; // Increased from 3 to 5
+  const svgHeight = cubeSize; // Increased from 3 to 5
   const svgX = canvas.width / 2 - svgWidth / 2;
   const svgY = canvas.height / 2 - svgHeight / 2;
 
-  const cubeSize = Math.max(svgWidth, svgHeight) * 1.1;
   const cubeX = canvas.width / 2 - cubeSize / 2;
   const cubeY = canvas.height / 2 - cubeSize / 2;
 
-  if (currentHeight === 200 && svgImage.naturalWidth) {
+  if (currentHeight === 200) {
     currentHeight = cubeSize;
   }
 
@@ -113,6 +129,22 @@ function update(dt) {
     mouseY >= cubeY &&
     mouseY <= cubeY + cubeSize;
   const isPressedAndHovering = input.isPressed() && isHovering;
+
+  // New: Manage sound playback based on click state
+  if (isPressedAndHovering) {
+    if (!isSoundPlaying) {
+      clickSound
+        .play()
+        .catch((err) => console.error("Audio play failed:", err)); // Handle potential autoplay issues
+      isSoundPlaying = true;
+    }
+  } else {
+    if (isSoundPlaying) {
+      clickSound.pause();
+      clickSound.currentTime = 0; // Reset to start for next play
+      isSoundPlaying = false;
+    }
+  }
 
   // Melt animation
   if (isPressedAndHovering) {
@@ -159,7 +191,7 @@ function update(dt) {
   ctx.lineWidth = 3;
   ctx.stroke();
 
-  if (svgImage.complete && svgImage.naturalWidth) {
+  if (svgImage.complete) {
     ctx.drawImage(svgImage, svgX, svgY, svgWidth, svgHeight);
   }
 
@@ -182,27 +214,21 @@ function update(dt) {
   }
 
   // ---- DRAW MOUSE SVG LAST ----
-  if (mouseBounds) {
-    const scale = 1.5;
-    const visibleW = mouseBounds.w * scale;
-    const visibleH = mouseBounds.h * scale;
+  // Switch cursor image when clicked
+  const cursorToDraw = input.isPressed() ? mousePressedImage : mouseImage;
 
-    // Position cursor so it's drawn below the mouse position
-    const drawX = mouseX - visibleW / 2 - mouseBounds.x * scale;
-    const drawY = mouseY - mouseBounds.y * scale;
-
-    // Switch cursor image when clicked
-    const cursorToDraw = input.isPressed() ? mousePressedImage : mouseImage;
-
-    if (cursorToDraw.complete && cursorToDraw.naturalWidth) {
-      ctx.drawImage(
-        cursorToDraw,
-        drawX,
-        drawY,
-        cursorToDraw.naturalWidth * scale,
-        cursorToDraw.naturalHeight * scale
-      );
-    }
+  if (true) {
+    const baseSize = 200;
+    const aspect = cursorToDraw.width / cursorToDraw.height;
+    const mouseWidth = baseSize * aspect;
+    const mouseHeight = baseSize;
+    ctx.drawImage(
+      cursorToDraw,
+      mouseX - mouseWidth / 2,
+      mouseY,
+      mouseWidth,
+      mouseHeight
+    );
   }
 
   if (completelyMelted) {

@@ -11,6 +11,24 @@ giftImg.src = "gift.svg";
 const zeroImg = new Image();
 zeroImg.src = "zero.svg";
 
+// Load SVG for green squares
+// To change the SVG: replace "square1.svg", "square2.svg", etc. with your own SVG files
+// You can use any number of different SVGs - they'll be randomly assigned to squares
+const squareSVGs = ["pin.svg", "8.svg", "heart.svg", "star.svg"];
+
+const squareImages = [];
+squareSVGs.forEach((src, index) => {
+  const img = new Image();
+  img.src = src;
+  img.onload = () => {
+    console.log(`Square SVG ${index + 1} loaded`);
+  };
+  img.onerror = () => {
+    console.log(`Square SVG ${index + 1} not found, using fallback`);
+  };
+  squareImages.push(img);
+});
+
 let imagesLoaded = 0;
 const totalImages = 2;
 
@@ -32,13 +50,24 @@ zeroImg.onerror = () => {
   imagesLoaded++;
 };
 
-// Load shake sound effect
-// To change the sound: replace "shake.mp3" with your own audio file
+// Load open sound effect
+// To change the sound: replace "pop.mp3" with your own audio file
 // Supported formats: .mp3, .wav, .ogg
-const shakeSound = new Audio("sparkle.mp3");
-shakeSound.volume = 0.5; // Adjust volume (0.0 to 1.0)
-shakeSound.onerror = () => {
-  console.log("Shake sound not found, continuing without sound");
+const openSound = new Audio();
+openSound.src = "pop.mp3";
+openSound.volume = 0.5;
+openSound.onerror = () => {
+  console.log("Open sound not found, will play silently");
+};
+
+// Load fall sound effect
+// To change the sound: replace "fall.mp3" with your own audio file
+// Supported formats: .mp3, .wav, .ogg
+const fallSound = new Audio();
+fallSound.src = "whistle.mp3";
+fallSound.volume = 0.7;
+fallSound.onerror = () => {
+  console.log("Fall sound not found, will play silently");
 };
 
 const spring = new Spring({
@@ -121,30 +150,20 @@ class Gift {
     }
   }
 
-  update(dt, mouseX, mouseY, isPressed) {
-    // if (this.isOpen) {
-    //   // Only increase open progress if not falling yet
-    //   if (!this.isFalling) {
-    //     this.openProgress = Math.min(this.openProgress + dt * 2, 1);
-    //   }
-    //   this.targetScale = this.baseScale; // Reset to normal size when opening
-    //   this.scale += (this.targetScale - this.scale) * 10 * dt;
+  playOpenSound() {
+    try {
+      // Clone the audio to allow overlapping sounds
+      const sound = openSound.cloneNode();
+      sound.volume = openSound.volume;
+      sound.play().catch((err) => {
+        // Silently fail if audio can't play (e.g., browser autoplay policy)
+      });
+    } catch (err) {
+      // Silently fail if cloning fails
+    }
+  }
 
-    //   // If falling animation started, make it fall
-    //   if (this.isFalling) {
-    //     this.vy += 3000 * dt; // Stronger gravity during fall
-    //     this.y += this.vy * dt;
-    //     this.rotation += this.rotationVel * dt;
-    //     this.rotationVel += (Math.random() - 0.5) * 10 * dt;
-    //   }
-    //   return;
-    // }
-    // if (this.isFalling) {
-    //   this.vy += 3000 * dt; // Stronger gravity during fall
-    //   this.y += this.vy * dt;
-    //   this.rotation += this.rotationVel * dt;
-    //   this.rotationVel += (Math.random() - 0.5) * 10 * dt;
-    // }
+  update(dt, mouseX, mouseY, isPressed) {
     // Smoothly animate scale towards target
     this.scale += (this.targetScale - this.scale) * 10 * dt;
 
@@ -198,8 +217,6 @@ class Gift {
     }
 
     if (this.isDragging) {
-      // const dx = mouseX - this.lastX;
-      // const dy = mouseY - this.lastY;
       const dx = this.vx;
       const dy = this.vy;
       const movement = Math.sqrt(dx * dx + dy * dy);
@@ -225,22 +242,6 @@ class Gift {
         this.lastDir = currentDir;
       }
 
-      // if (movement < 10) {
-      //   this.shakeAmount = Math.max(0, this.shakeAmount - 150 * dt);
-      //   this.shakeCount = Math.max(0, this.shakeCount - 2 * dt);
-      // }
-
-      // if (this.shakeAmount > 600 && this.shakeCount > 3) {
-      //   this.isOpen = true;
-      //   this.isDragging = false;
-      // }
-
-      // this.lastX = this.x;
-      // this.lastY = this.y;
-
-      // this.x = mouseX;
-      // this.y = mouseY;
-
       if (movement > 10 && this.shakeAmount > 500) {
         this.rotation += (Math.random() - 0.5) * 0.5;
       }
@@ -263,10 +264,9 @@ class Gift {
   endDrag(mouseX, mouseY) {
     this.isDragging = false;
     this.targetScale = this.baseScale; // Return to normal size
-    // this.vx = (mouseX - this.lastX) * 10;
-    // this.vy = (mouseY - this.lastY) * 10;
     this.rotationVel = (mouseX - this.dragStartX) * 0.05;
     this.isOpen = true;
+    this.playOpenSound(); // Play sound when gift opens
   }
 
   isMouseOver(mouseX, mouseY) {
@@ -285,28 +285,15 @@ class Gift {
       ctx.translate(this.x, this.y);
       ctx.rotate(this.rotation);
 
-      // Draw green rounded squares as the gift disappears
-      const squareSize = this.size * 0.4;
+      // Draw one green rounded square as the gift disappears
+      const squareSize = this.size * 0.5;
       const cornerRadius = 10;
 
-      // Draw two green rounded squares offset from each other
       ctx.fillStyle = "#4CAF50";
-
-      // First square (top-left)
       this.drawRoundedRect(
         ctx,
-        -squareSize * 0.6,
-        -squareSize * 0.6,
-        squareSize,
-        squareSize,
-        cornerRadius
-      );
-
-      // Second square (bottom-right)
-      this.drawRoundedRect(
-        ctx,
-        squareSize * 0.2,
-        squareSize * 0.2,
+        -squareSize / 2,
+        -squareSize / 2,
         squareSize,
         squareSize,
         cornerRadius
@@ -350,13 +337,156 @@ class Gift {
       ctx.fill();
     }
 
-    // Shake feedback removed for cleaner look
+    ctx.restore();
+  }
+}
+
+// Green square class for opened gifts
+class GreenSquare {
+  constructor(x, y, offsetX, offsetY, size) {
+    this.x = x + offsetX;
+    this.y = y + offsetY;
+    this.vx = 0;
+    this.vy = 0;
+    this.rotation = Math.random() * Math.PI * 2;
+    this.rotationVel = 0;
+    this.size = size;
+    this.isDragging = false;
+    this.scale = 1;
+    this.targetScale = 1;
+    this.isFalling = false;
+    // Randomly assign one of the square SVGs
+    this.svgImage =
+      squareImages[Math.floor(Math.random() * squareImages.length)];
+  }
+
+  update(dt, mouseX, mouseY) {
+    this.scale += (this.targetScale - this.scale) * 10 * dt;
+
+    if (this.isFalling) {
+      this.vy += 3000 * dt;
+      this.rotationVel += (Math.random() - 0.5) * 15 * dt;
+      this.vx += (Math.random() - 0.5) * 500 * dt;
+    }
+
+    if (this.isDragging) {
+      const springForce = 100;
+      const springDamping = 1;
+      this.vx += (mouseX - this.x) * springForce - this.vx * springDamping;
+      this.vy += (mouseY - this.y) * springForce - this.vy * springDamping;
+    }
+
+    this.vy += 4000 * dt;
+    this.vx *= 0.999;
+    this.vy *= 0.999;
+
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
+    this.rotation += this.rotationVel * dt;
+    this.rotationVel *= 0.95;
+
+    if (!this.isFalling) {
+      if (this.y > canvas.height - this.size / 2) {
+        this.y = canvas.height - this.size / 2;
+        this.vy *= -0.6;
+        this.vx *= 0.8;
+        this.rotationVel *= 0.8;
+      }
+      if (this.x < this.size / 2) {
+        this.x = this.size / 2;
+        this.vx *= -0.6;
+      }
+      if (this.x > canvas.width - this.size / 2) {
+        this.x = canvas.width - this.size / 2;
+        this.vx *= -0.6;
+      }
+      if (this.y < this.size / 2) {
+        this.y = this.size / 2;
+        this.vy *= -0.6;
+      }
+    }
+  }
+
+  startDrag() {
+    this.isDragging = true;
+    this.targetScale = 1.2;
+    this.vx = 0;
+    this.vy = 0;
+  }
+
+  endDrag() {
+    this.isDragging = false;
+    this.targetScale = 1;
+  }
+
+  isMouseOver(mouseX, mouseY) {
+    const dx = mouseX - this.x;
+    const dy = mouseY - this.y;
+    return Math.sqrt(dx * dx + dy * dy) < this.size / 2;
+  }
+
+  drawRoundedRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  draw(ctx) {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rotation);
+    ctx.scale(this.scale, this.scale);
+
+    // Try to draw SVG if loaded, otherwise use fallback green square
+    if (
+      this.svgImage &&
+      this.svgImage.complete &&
+      this.svgImage.naturalWidth > 0
+    ) {
+      // Use natural SVG proportions
+      const w = this.svgImage.width;
+      const h = this.svgImage.height;
+      const aspectRatio = w / h;
+
+      let drawW, drawH;
+      if (aspectRatio > 1) {
+        drawW = this.size;
+        drawH = this.size / aspectRatio;
+      } else {
+        drawH = this.size;
+        drawW = this.size * aspectRatio;
+      }
+
+      ctx.drawImage(this.svgImage, -drawW / 2, -drawH / 2, drawW, drawH);
+    } else {
+      // Fallback: green rounded square
+      ctx.fillStyle = "#16db2e";
+      const cornerRadius = 10;
+      this.drawRoundedRect(
+        ctx,
+        -this.size / 2,
+        -this.size / 2,
+        this.size,
+        this.size,
+        cornerRadius
+      );
+    }
 
     ctx.restore();
   }
 }
 
 const gifts = [];
+const greenSquares = [];
 const numGifts = 15;
 const specialGiftIndex = Math.floor(Math.random() * numGifts);
 
@@ -372,6 +502,7 @@ for (let i = 0; i < numGifts; i++) {
 }
 
 let draggedGift = null;
+let draggedSquare = null;
 let zeroRevealed = false;
 let zeroScale = 0;
 let zeroRevealTime = 0;
@@ -383,6 +514,18 @@ let zeroRotationVel = 0;
 let zeroX = 0;
 let zeroVX = 0;
 
+function playFallSound() {
+  try {
+    const sound = fallSound.cloneNode();
+    sound.volume = fallSound.volume;
+    sound.play().catch((err) => {
+      // Silently fail if audio can't play
+    });
+  } catch (err) {
+    // Silently fail if cloning fails
+  }
+}
+
 function update(dt) {
   const mouseX = input.getX();
   const mouseY = input.getY();
@@ -391,32 +534,64 @@ function update(dt) {
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  if (isPressed && !draggedGift) {
-    for (let i = gifts.length - 1; i >= 0; i--) {
-      if (!gifts[i].isOpen && gifts[i].isMouseOver(mouseX, mouseY)) {
-        draggedGift = gifts[i];
-        draggedGift.startDrag(mouseX, mouseY);
+  // Handle drag start
+  if (isPressed && !draggedGift && !draggedSquare) {
+    // Check green squares first (on top)
+    for (let i = greenSquares.length - 1; i >= 0; i--) {
+      if (greenSquares[i].isMouseOver(mouseX, mouseY)) {
+        draggedSquare = greenSquares[i];
+        draggedSquare.startDrag();
         break;
+      }
+    }
+
+    // If no square was clicked, check gifts
+    if (!draggedSquare) {
+      for (let i = gifts.length - 1; i >= 0; i--) {
+        if (!gifts[i].isOpen && gifts[i].isMouseOver(mouseX, mouseY)) {
+          draggedGift = gifts[i];
+          draggedGift.startDrag(mouseX, mouseY);
+          break;
+        }
       }
     }
   }
 
-  if (!isPressed && draggedGift) {
-    draggedGift.endDrag(mouseX, mouseY);
-    draggedGift = null;
+  // Handle drag end
+  if (!isPressed) {
+    if (draggedGift) {
+      draggedGift.endDrag(mouseX, mouseY);
+      draggedGift = null;
+    }
+    if (draggedSquare) {
+      draggedSquare.endDrag();
+      draggedSquare = null;
+    }
   }
 
+  // Update gifts
   for (const gift of gifts) {
     gift.update(dt, mouseX, mouseY, isPressed);
+
+    // Create one green square when gift opens (non-zero gifts only)
+    if (gift.isOpen && !gift.hasZero && gift.openProgress === 0) {
+      gift.openProgress = 0.01; // Mark as processed
+      const squareSize = gift.size * 0.5;
+      greenSquares.push(new GreenSquare(gift.x, gift.y, 0, 0, squareSize));
+    }
   }
 
-  // Gift-to-gift collisions - make them push each other around
+  // Update green squares
+  for (const square of greenSquares) {
+    square.update(dt, mouseX, mouseY);
+  }
+
+  // Gift-to-gift collisions
   for (let i = 0; i < gifts.length; i++) {
     for (let j = i + 1; j < gifts.length; j++) {
       const g1 = gifts[i];
       const g2 = gifts[j];
 
-      // Skip if either is open or falling
       if (g1.isFalling || g2.isFalling) continue;
 
       const dx = g2.x - g1.x;
@@ -425,12 +600,9 @@ function update(dt) {
       const minDist = (g1.size + g2.size) / 2;
 
       if (dist < minDist && dist > 0) {
-        // Collision! Push them apart
         const overlap = minDist - dist;
         const nx = dx / dist;
         const ny = dy / dist;
-
-        // Apply separation with more force if one is being dragged
         const force = g1.isDragging || g2.isDragging ? 0.6 : 0.3;
 
         if (!g1.isDragging) {
@@ -452,6 +624,80 @@ function update(dt) {
     }
   }
 
+  // Square-to-square collisions
+  for (let i = 0; i < greenSquares.length; i++) {
+    for (let j = i + 1; j < greenSquares.length; j++) {
+      const s1 = greenSquares[i];
+      const s2 = greenSquares[j];
+
+      if (s1.isFalling || s2.isFalling) continue;
+
+      const dx = s2.x - s1.x;
+      const dy = s2.y - s1.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const minDist = (s1.size + s2.size) / 2;
+
+      if (dist < minDist && dist > 0) {
+        const overlap = minDist - dist;
+        const nx = dx / dist;
+        const ny = dy / dist;
+        const force = s1.isDragging || s2.isDragging ? 0.6 : 0.3;
+
+        if (!s1.isDragging) {
+          s1.x -= nx * overlap * force;
+          s1.y -= ny * overlap * force;
+          s1.vx -= nx * 200 * (s2.isDragging ? 2 : 1);
+          s1.vy -= ny * 200 * (s2.isDragging ? 2 : 1);
+          s1.rotationVel += (Math.random() - 0.5) * 5;
+        }
+
+        if (!s2.isDragging) {
+          s2.x += nx * overlap * force;
+          s2.y += ny * overlap * force;
+          s2.vx += nx * 200 * (s1.isDragging ? 2 : 1);
+          s2.vy += ny * 200 * (s1.isDragging ? 2 : 1);
+          s2.rotationVel += (Math.random() - 0.5) * 5;
+        }
+      }
+    }
+  }
+
+  // Square-to-gift collisions
+  for (const square of greenSquares) {
+    for (const gift of gifts) {
+      if (square.isFalling || gift.isFalling || gift.isOpen) continue;
+
+      const dx = gift.x - square.x;
+      const dy = gift.y - square.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const minDist = (square.size + gift.size) / 2;
+
+      if (dist < minDist && dist > 0) {
+        const overlap = minDist - dist;
+        const nx = dx / dist;
+        const ny = dy / dist;
+        const force = square.isDragging || gift.isDragging ? 0.6 : 0.3;
+
+        if (!square.isDragging) {
+          square.x -= nx * overlap * force;
+          square.y -= ny * overlap * force;
+          square.vx -= nx * 200 * (gift.isDragging ? 2 : 1);
+          square.vy -= ny * 200 * (gift.isDragging ? 2 : 1);
+          square.rotationVel += (Math.random() - 0.5) * 5;
+        }
+
+        if (!gift.isDragging) {
+          gift.x += nx * overlap * force;
+          gift.y += ny * overlap * force;
+          gift.vx += nx * 200 * (square.isDragging ? 2 : 1);
+          gift.vy += ny * 200 * (square.isDragging ? 2 : 1);
+          gift.rotationVel += (Math.random() - 0.5) * 5;
+        }
+      }
+    }
+  }
+
+  // Check for zero reveal
   for (const gift of gifts) {
     if (gift.isOpen && gift.hasZero && !zeroRevealed) {
       zeroRevealed = true;
@@ -461,43 +707,61 @@ function update(dt) {
     }
   }
 
+  // Draw everything (non-dragged items first)
   for (const gift of gifts) {
-    if (gift !== draggedGift) {
+    if (gift !== draggedGift && !gift.isOpen) {
       gift.draw(ctx);
     }
   }
+
+  for (const square of greenSquares) {
+    if (square !== draggedSquare) {
+      square.draw(ctx);
+    }
+  }
+
+  // Draw dragged items on top
   if (draggedGift) {
     draggedGift.draw(ctx);
   }
+  if (draggedSquare) {
+    draggedSquare.draw(ctx);
+  }
 
+  // Handle zero reveal and falling animation
   if (zeroRevealed) {
     zeroRevealTime += dt;
     spring.step(dt);
     zeroScale = Math.max(spring.position, 0);
 
-    // Start falling animation 2 seconds after zero appears
     if (zeroRevealTime >= 2.0 && !fallAnimationStarted) {
       fallAnimationStarted = true;
-      // Make all UNOPENED gifts start falling with more goofy motion
+
+      // Play the fall sound when everything starts falling
+      playFallSound();
+
       for (const gift of gifts) {
         gift.isFalling = true;
-        gift.vy = Math.random() * 400 - 200; // More random initial velocity
-        gift.vx = Math.random() * 800 - 400; // More horizontal chaos
-        gift.rotationVel = Math.random() * 20 - 10; // Faster spinning
+        gift.vy = Math.random() * 400 - 200;
+        gift.vx = Math.random() * 800 - 400;
+        gift.rotationVel = Math.random() * 20 - 10;
       }
-      // Start zero falling with goofy motion
+      for (const square of greenSquares) {
+        square.isFalling = true;
+        square.vy = Math.random() * 400 - 200;
+        square.vx = Math.random() * 800 - 400;
+        square.rotationVel = Math.random() * 20 - 10;
+      }
       zeroVY = Math.random() * 200 - 100;
       zeroVX = Math.random() * 400 - 200;
-      zeroRotationVel = Math.random() * 8 - 4; // Random spin
+      zeroRotationVel = Math.random() * 8 - 4;
     }
 
-    // Update zero position if falling
     if (fallAnimationStarted) {
       zeroVY += 3000 * dt;
       zeroY += zeroVY * dt;
       zeroX += zeroVX * dt;
       zeroRotation += zeroRotationVel * dt;
-      // Add some wobble to the rotation
       zeroRotationVel += (Math.random() - 0.5) * 12 * dt;
     }
 
@@ -510,17 +774,14 @@ function update(dt) {
     ctx.scale(zeroScale, zeroScale);
 
     if (zeroImg.complete && zeroImg.naturalWidth > 0) {
-      // Use natural SVG proportions for zero
       const maxSize = canvas.height * 0.5;
       const aspectRatio = zeroImg.width / zeroImg.height;
       let w, h;
 
       if (aspectRatio > 1) {
-        // Wider than tall
         w = maxSize;
         h = maxSize / aspectRatio;
       } else {
-        // Taller than wide
         h = maxSize;
         w = maxSize * aspectRatio;
       }
@@ -540,6 +801,4 @@ function update(dt) {
       setTimeout(() => finish(), 500);
     }
   }
-
-  // Instructions removed
 }

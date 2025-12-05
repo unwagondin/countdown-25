@@ -75,6 +75,12 @@ gridSvgPaths.forEach((path, i) => {
   gridImages[gridImageKeys[i]] = img;
 });
 
+// Load destroy sound (replace 'destroy.wav' with your sound file path)
+const destroySound = new Audio("crunch.mp3");
+
+// Load explosion sound for when the gift (tall piece) explodes
+const explodeSound = new Audio("explosion.mp3"); // Replace with your desired explosion sound file
+
 // Track mouse
 let mouseX = 0;
 let mouseY = 0;
@@ -222,6 +228,12 @@ function update(dt) {
         grid[i].isFalling = true;
         const onRight = grid[i].x >= centerX;
         grid[i].velX = onRight ? 200 : -200;
+        // Play sound when piece starts falling
+        if (grid[i].type === "tall") {
+          explodeSound.play(); // Play explosion sound for the gift (tall piece)
+        } else {
+          destroySound.play(); // Play destroy sound for other pieces
+        }
       }
     }
 
